@@ -1,0 +1,5 @@
+<% Category.all.each do |category| %>
+  <li>
+    <%= lint_to category.name, posts_path(category: category.name) %>
+  </li>
+<% end %>
