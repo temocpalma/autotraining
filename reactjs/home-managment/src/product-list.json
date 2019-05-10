@@ -1,0 +1,7 @@
+{
+  "products": [
+    {"id": 1, "name": "Product 1", "price": 299, "image":"https://free-images.com/md/1d3b/mannequin_trade_garment_shirt.jpg"},
+    {"id": 2, "name": "Product 2", "price": 99, "image":"https://free-images.com/md/70b2/white_shirt_vietnam_girl_1.jpg"},
+    {"id": 3, "name": "Product 3", "price": 149, "image":"https://free-images.com/md/9774/shirts_things_top_view.jpg"}
+  ]
+}
