@@ -6,7 +6,7 @@ import org.apache.camel.builder.*
 
 @Component
 class MoveFilesDataRoute extends RouteBuilder {
-  String sourceData = "/Users/temoc/development/autotraining/camel-training-4/data"
+  String sourceData = "/Users/temoc/development/autotraining/data"
 
   @Override
   void configure() throws Exception {
