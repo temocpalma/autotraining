@@ -1,0 +1,37 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.6.RELEASE'
+		camelVersion = '2.24.2'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+bootJar {
+	baseName = 'gs-spring-boot'
+	version =  '0.1.0'
+}
+
+repositories {
+	mavenCentral()
+}
+
+sourceCompatibility = 1.8
+
+dependencies {
+	implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+	implementation 'org.codehaus.groovy:groovy:2.5.3'
+	implementation group: 'org.apache.camel', name: 'camel-spring-boot', version: "${camelVersion}"
+	compile group: 'org.apache.camel', name: 'camel-spring', version: "${camelVersion}"
+	compile group: 'org.apache.camel', name: 'camel-spring-javaconfig', version: "${camelVersion}"
+
+	testCompile "junit:junit"
+}
