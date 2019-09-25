@@ -25,6 +25,14 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :exldap, :settings,
+  server: "ldap.forumsys.com",
+  base: "dc=example,dc=com",
+  port: 389,
+  ssl: true,
+  user_dn: "cn=read-only-admin,dc=example,dc=com",
+  password: "password",
+  search_timeout: 1000
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
