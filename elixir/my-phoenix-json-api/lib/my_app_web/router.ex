@@ -20,6 +20,11 @@ defmodule MyAppWeb.Router do
     resources "/users", UserController, except: [:new, :edit]
   end
 
+  scope "/api", MyAppWeb do
+    pipe_through :api
+    post "/users/sign_in_ldap", UserController, :sign_in_ldap
+  end
+
   #Plug function
   defp ensure_authenticated(conn, _opts) do
     current_user_id = get_session(conn, :current_user_id)
