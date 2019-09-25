@@ -109,7 +109,7 @@ defmodule MyApp.Auth do
 
   def authenticate_ldap(uid, password) do
     {:ok, ldap_conn} = Exldap.open
-    bind = "uid=#{uid},dc=example,dc=com"
+    bind = "uid=#{uid},dc=zflexsoftware,dc=com"
     case Exldap.verify_credentials(ldap_conn, bind, password) do
       :ok -> :ok
       _ -> {:error, "Invalid username / password"}
