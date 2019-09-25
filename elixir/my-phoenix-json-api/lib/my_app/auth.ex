@@ -107,6 +107,15 @@ defmodule MyApp.Auth do
     query |> Repo.one() |> verify_password(password)
   end
 
+  def authenticate_ldap(uid, password) do
+    {:ok, ldap_conn} = Exldap.open
+    bind = "uid=#{uid},dc=example,dc=com"
+    case Exldap.verify_credentials(ldap_conn, bind, password) do
+      :ok -> :ok
+      _ -> {:error, "Invalid username / password"}
+    end
+  end
+
   defp verify_password(nil, _) do
     # Perform a dummy check to make user enumeration more difficult
     Bcrypt.no_user_verify()
