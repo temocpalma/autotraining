@@ -58,4 +58,20 @@ defmodule MyAppWeb.UserController do
         |> render("401.json", message: message)
     end
   end
+
+  def sign_in_ldap(conn, %{"username" => username, "password" => password}) do
+    case MyApp.Auth.authenticate_ldap(username, password) do
+      {:ok} ->
+        conn
+        |> put_status(:ok)
+        |> put_view(MyAppWeb.UserView)
+        |> render("sign_in_ldap.json", message: "Ldap authorized")
+
+      {:error, message} ->
+        conn
+        |> put_status(:unauthorized)
+        |> put_view(MyAppWeb.ErrorView)
+        |> render("401.json", message: message)
+    end
+  end
 end
