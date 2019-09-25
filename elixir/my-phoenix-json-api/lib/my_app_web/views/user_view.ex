@@ -26,4 +26,9 @@ defmodule MyAppWeb.UserView do
       }
     }
   end
+
+  def render("sign_in_ldap.json", %{message: message}) do
+    %{data: %{message: message}}
+  end
+
 end
