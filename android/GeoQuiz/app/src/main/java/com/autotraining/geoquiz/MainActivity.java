@@ -33,6 +33,12 @@ public class MainActivity extends AppCompatActivity {
 				setContentView(R.layout.activity_main);
 
 				mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
+				mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showNextQuestion();
+            }
+        });
 
 				mTrueButton = (Button) findViewById(R.id.true_button);
 				mTrueButton.setOnClickListener(new View.OnClickListener() {
@@ -54,8 +60,7 @@ public class MainActivity extends AppCompatActivity {
 				mNextButton.setOnClickListener(new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
-								mCurrentIndex = (mCurrentIndex + 1) % mQuestions.length;
-                updateQuestion();
+								showNextQuestion();
 						}
 				});
 
@@ -79,5 +84,10 @@ public class MainActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(MainActivity.this, messageResId, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP,0,200);
         toast.show();
+    }
+
+    private void showNextQuestion() {
+        mCurrentIndex = (mCurrentIndex + 1) % mQuestions.length;
+        updateQuestion();
     }
 }
