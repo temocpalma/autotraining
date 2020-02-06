@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
 
 		private Button mTrueButton;
 		private Button mFalseButton;
+		private Button mPrevButton;
 		private Button mNextButton;
 		private TextView mQuestionTextView;
 
@@ -56,6 +57,14 @@ public class MainActivity extends AppCompatActivity {
 						}
 				});
 
+				mPrevButton = (Button) findViewById(R.id.prev_button);
+				mPrevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPrevQuestion();
+            }
+        });
+
 				mNextButton = (Button) findViewById(R.id.next_button);
 				mNextButton.setOnClickListener(new View.OnClickListener() {
 						@Override
@@ -88,6 +97,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void showNextQuestion() {
         mCurrentIndex = (mCurrentIndex + 1) % mQuestions.length;
+        updateQuestion();
+    }
+
+    private void showPrevQuestion() {
+        mCurrentIndex = mCurrentIndex > 0 ? (mCurrentIndex - 1) : (mQuestions.length - 1);
         updateQuestion();
     }
 }
