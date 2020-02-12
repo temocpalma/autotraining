@@ -11,10 +11,18 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
 	private static final String TAG = "MainActivity";
 	private static final String KEY_INDEX = "index";
+	private static final String ANSWERS_STRING = "answers";
+	private static final String SCORE = "score";
 
 	private Button mTrueButton;
 	private Button mFalseButton;
@@ -32,15 +40,19 @@ public class MainActivity extends AppCompatActivity {
 	};
 
 	private int mCurrentIndex = 0;
+	private List<Integer> mAnswers = new ArrayList<Integer>();
+	private BigDecimal score = new BigDecimal(0);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.d(TAG, "onCreate(Bundle) called");
 		setContentView(R.layout.activity_main);
+		initAnswersList();
 
 		if (savedInstanceState != null) {
 			mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
+			mAnswers = loadAnswersSaved(savedInstanceState.getString(ANSWERS_STRING));
 		}
 
 		mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
@@ -109,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
 		super.onSaveInstanceState(savedInstanceState);
 		Log.i(TAG, "onSaveInstanceState");
 		savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+		savedInstanceState.putString(ANSWERS_STRING, mAnswers.toString().replace("[", "").replace("]", ""));
 	}
 
 	@Override
@@ -123,15 +136,38 @@ public class MainActivity extends AppCompatActivity {
 		Log.d(TAG, "onDestroy() called");
 	}
 
+	private void initAnswersList() {
+		for (int i = 0; i < mQuestions.length; i++) {
+			mAnswers.add(-1); //no answer
+		}
+	}
+
+	private List<Integer> loadAnswersSaved(String answers) {
+		List<Integer> intAnswersList = new ArrayList<Integer>();
+		List<String> stringAnswersList = new ArrayList<String>(Arrays.asList(answers.split(",")));
+		for (int i = 0; i < stringAnswersList.size(); i++) {
+			intAnswersList.add(Integer.parseInt(stringAnswersList.get(i).trim()));
+		}
+		return intAnswersList;
+	}
+
 	private void enableAnswerButtons(boolean enableValue) {
 		mTrueButton.setEnabled(enableValue);
 		mFalseButton.setEnabled(enableValue);
 	}
 
+	private void saveAnswer(int answer) {
+		mAnswers.set(mCurrentIndex, answer);
+	}
+
 	private void updateQuestion() {
 		int question = mQuestions[mCurrentIndex].getTextResId();
 		mQuestionTextView.setText(question);
-		enableAnswerButtons(true);
+		if (mAnswers.get(mCurrentIndex) != -1) {
+			enableAnswerButtons(false);
+		} else {
+			enableAnswerButtons(true);
+		}
 	}
 
 	private void checkAnswer(boolean userAnswer) {
@@ -140,8 +176,10 @@ public class MainActivity extends AppCompatActivity {
 		int messageResId = 0;
 		if (userAnswer == answerIsTrue) {
 			messageResId = R.string.correct_toast;
+			saveAnswer(1);
 		} else {
 			messageResId = R.string.incorrect_toast;
+			saveAnswer(0);
 		}
 
 		Toast toast = Toast.makeText(MainActivity.this, messageResId, Toast.LENGTH_SHORT);
@@ -152,10 +190,36 @@ public class MainActivity extends AppCompatActivity {
 	private void showNextQuestion() {
 		mCurrentIndex = (mCurrentIndex + 1) % mQuestions.length;
 		updateQuestion();
+		checkAllQuestionsAnswered();
 	}
 
 	private void showPrevQuestion() {
 		mCurrentIndex = mCurrentIndex > 0 ? (mCurrentIndex - 1) : (mQuestions.length - 1);
 		updateQuestion();
+		checkAllQuestionsAnswered();
+	}
+
+	private void checkAllQuestionsAnswered() {
+		if (!mAnswers.contains(-1)) {
+			computeScore();
+			displayScore();
+		}
+	}
+
+	private void computeScore() {
+		double totalOkAnswers = 0.0;
+		for (int i = 0; i < mAnswers.size(); i++) {
+			totalOkAnswers += mAnswers.get(i).intValue();
+		}
+		score = new BigDecimal((totalOkAnswers / mAnswers.size()) * 100);
+	}
+
+	private void displayScore() {
+		DecimalFormat df = new DecimalFormat();
+		df.setMaximumFractionDigits(2);
+		String scoreMessage = "Score: " + df.format(score) + "%";
+		Toast toast = Toast.makeText(MainActivity.this, scoreMessage, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.TOP, 0, 200);
+		toast.show();
 	}
 }
