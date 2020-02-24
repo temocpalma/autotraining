@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 	private static final String KEY_INDEX = "index";
 	private static final String ANSWERS_STRING = "answers";
 	private static final int REQUEST_CODE_CHEAT = 0;
+	private static final String IS_CHEATER = "isCheater";
 
 	private Button mTrueButton;
 	private Button mFalseButton;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private int mCurrentIndex = 0;
 	private List<Integer> mAnswers = new ArrayList<Integer>();
+	private List<Integer> mAnswersCheated = new ArrayList<Integer>();
 	private BigDecimal score = new BigDecimal(0);
 	private boolean mIsCheater;
 
@@ -53,10 +55,12 @@ public class MainActivity extends AppCompatActivity {
 		Log.d(TAG, "onCreate(Bundle) called");
 		setContentView(R.layout.activity_main);
 		initAnswersList();
+		initAnswersCheatedList();
 
 		if (savedInstanceState != null) {
 			mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
 			mAnswers = loadAnswersSaved(savedInstanceState.getString(ANSWERS_STRING));
+			mIsCheater = savedInstanceState.getBoolean(IS_CHEATER);
 		}
 
 		mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
@@ -114,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult.....");
 		if (resultCode != Activity.RESULT_OK) {
 			return;
 		}
@@ -150,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
 		Log.i(TAG, "onSaveInstanceState");
 		savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
 		savedInstanceState.putString(ANSWERS_STRING, mAnswers.toString().replace("[", "").replace("]", ""));
+		savedInstanceState.putBoolean(IS_CHEATER, mIsCheater);
 	}
 
 	@Override
@@ -167,6 +173,12 @@ public class MainActivity extends AppCompatActivity {
 	private void initAnswersList() {
 		for (int i = 0; i < mQuestions.length; i++) {
 			mAnswers.add(-1); //no answer
+		}
+	}
+
+	private void initAnswersCheatedList() {
+		for (int i = 0; i < mQuestions.length; i++) {
+			mAnswersCheated.add(-1); //no cheated
 		}
 	}
 
@@ -192,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
 	private void updateQuestion() {
 		int question = mQuestions[mCurrentIndex].getTextResId();
 		mQuestionTextView.setText(question);
-		if (mAnswers.get(mCurrentIndex) != -1) {
+		if (mAnswers.get(mCurrentIndex) != -1 && mAnswersCheated.get(mCurrentIndex) != 1) {
 			enableAnswerButtons(false);
 		} else {
 			enableAnswerButtons(true);
@@ -201,18 +213,19 @@ public class MainActivity extends AppCompatActivity {
 
 	private void checkAnswer(boolean userAnswer) {
 		boolean answerIsTrue = mQuestions[mCurrentIndex].isAnswerTrue();
-		enableAnswerButtons(false);
 		int messageResId = 0;
-		if (userAnswer == answerIsTrue) {
-			messageResId = R.string.correct_toast;
-			saveAnswer(1);
-		} else {
-			messageResId = R.string.incorrect_toast;
-			saveAnswer(0);
-		}
 
 		if (mIsCheater) {
 			messageResId = R.string.judgement_toast;
+		} else {
+			enableAnswerButtons(false);
+			if (userAnswer == answerIsTrue) {
+				messageResId = R.string.correct_toast;
+				saveAnswer(1);
+			} else {
+				messageResId = R.string.incorrect_toast;
+				saveAnswer(0);
+			}
 		}
 
 		Toast toast = Toast.makeText(MainActivity.this, messageResId, Toast.LENGTH_SHORT);
