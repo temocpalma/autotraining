@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
 	private static final String ANSWERS_STRING = "answers";
 	private static final int REQUEST_CODE_CHEAT = 0;
 	private static final String IS_CHEATER = "isCheater";
+	private static final String CHEATS_COUNT = "cheats_count";
+	private static final int MAX_CHEATS = 3;
 
 	private Button mTrueButton;
 	private Button mFalseButton;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 	private ImageButton mPrevButton;
 	private ImageButton mNextButton;
 	private TextView mQuestionTextView;
+	private TextView mCheatsCountTextView;
 
 	private Question[] mQuestions = new Question[]{
 		new Question(R.string.question_australia, true),
@@ -45,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
 
 	private int mCurrentIndex = 0;
 	private List<Integer> mAnswers = new ArrayList<Integer>();
-	private List<Integer> mAnswersCheated = new ArrayList<Integer>();
 	private BigDecimal score = new BigDecimal(0);
 	private boolean mIsCheater;
+	private int mCheatsCount = 3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
 		Log.d(TAG, "onCreate(Bundle) called");
 		setContentView(R.layout.activity_main);
 		initAnswersList();
-		initAnswersCheatedList();
 
 		if (savedInstanceState != null) {
 			mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
 			mAnswers = loadAnswersSaved(savedInstanceState.getString(ANSWERS_STRING));
 			mIsCheater = savedInstanceState.getBoolean(IS_CHEATER);
+			mCheatsCount = savedInstanceState.getInt(CHEATS_COUNT);
 		}
 
 		mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
@@ -114,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		updateQuestion();
+		checkCheatsCount();
 	}
 
 	@Override
@@ -128,6 +132,10 @@ public class MainActivity extends AppCompatActivity {
 				return;
 			}
 			mIsCheater = CheatActivity.wasAnswerShown(data);
+			if (mIsCheater) {
+				mCheatsCount--;
+				checkCheatsCount();
+			}
 		}
 	}
 
@@ -156,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
 		savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
 		savedInstanceState.putString(ANSWERS_STRING, mAnswers.toString().replace("[", "").replace("]", ""));
 		savedInstanceState.putBoolean(IS_CHEATER, mIsCheater);
+		savedInstanceState.putInt(CHEATS_COUNT, mCheatsCount);
 	}
 
 	@Override
@@ -176,12 +185,6 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
-	private void initAnswersCheatedList() {
-		for (int i = 0; i < mQuestions.length; i++) {
-			mAnswersCheated.add(-1); //no cheated
-		}
-	}
-
 	private List<Integer> loadAnswersSaved(String answers) {
 		List<Integer> intAnswersList = new ArrayList<Integer>();
 		List<String> stringAnswersList = new ArrayList<String>(Arrays.asList(answers.split(",")));
@@ -194,7 +197,11 @@ public class MainActivity extends AppCompatActivity {
 	private void enableAnswerButtons(boolean enableValue) {
 		mTrueButton.setEnabled(enableValue);
 		mFalseButton.setEnabled(enableValue);
-		mCheatButton.setEnabled(enableValue);
+		if (mCheatsCount > 0) {
+			mCheatButton.setEnabled(enableValue);
+		} else {
+			mCheatButton.setEnabled(false);
+		}
 	}
 
 	private void saveAnswer(int answer) {
@@ -204,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
 	private void updateQuestion() {
 		int question = mQuestions[mCurrentIndex].getTextResId();
 		mQuestionTextView.setText(question);
-		if (mAnswers.get(mCurrentIndex) != -1 && mAnswersCheated.get(mCurrentIndex) != 1) {
+		if (mAnswers.get(mCurrentIndex) != -1) {
 			enableAnswerButtons(false);
 		} else {
 			enableAnswerButtons(true);
@@ -269,4 +276,15 @@ public class MainActivity extends AppCompatActivity {
 		toast.setGravity(Gravity.TOP, 0, 200);
 		toast.show();
 	}
+
+	private void checkCheatsCount() {
+		String mAvailableCheatMessage = getString(R.string.available_cheats, mCheatsCount, MAX_CHEATS);
+
+		mCheatsCountTextView = (TextView) findViewById(R.id.cheats_count_text_view);
+		mCheatsCountTextView.setText(mAvailableCheatMessage);
+		if (mCheatsCount == 0) {
+			mCheatButton.setEnabled(false);
+		}
+	}
+
 }
